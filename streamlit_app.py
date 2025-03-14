@@ -1,10 +1,18 @@
-import google.generativeai as genai
 import os
 import logging
+import random
 import itertools
+import streamlit as st
+
+# Try importing google.generativeai and handle missing package
+try:
+    import google.generativeai as genai
+except ModuleNotFoundError:
+    st.error("Missing required package: google-generativeai. Install it using 'pip install google-generativeai'.")
+    raise
 
 # Initialize Gemini API
-api_key = os.getenv("AIzaSyAcj75jQSEmTNpEbB9CHWoQ87hO5fZ2N7g")
+api_key = os.getenv("GOOGLE_API_KEY", "YOUR_GEMINI_API_KEY")
 genai.configure(api_key=api_key)
 
 model = genai.GenerativeModel(
@@ -41,14 +49,14 @@ companies = {
 def generate_script(language, domain, company, role1, role2, emotion1, emotion2, gender, script_number):
     prompt = f"""
     Create a realistic call centre conversation script for a TTS dataset. The script should last at least 10 minutes.
-    
+   
     Language: {language}
     Domain: {domain}
     Company: {company}
     Roles: {role1} and {role2}
     Emotions: {role1} - {emotion1}, {role2} - {emotion2}
     Gender: {gender}
-    
+   
     The conversation should be natural, structured, and contain varied sentence patterns.
     """
 
@@ -57,13 +65,14 @@ def generate_script(language, domain, company, role1, role2, emotion1, emotion2,
         script = response.text
     except Exception as e:
         logging.error(f"Gemini API error: {e}")
+        st.error("Error communicating with Gemini API. Check logs for details.")
         return None
-    
-    filename = f"scripts/script_{language}{domain}{company}_{script_number}.txt"
+   
+    filename = f"scripts/script_{language}_{domain}_{company}_{script_number}.txt"
     os.makedirs("scripts", exist_ok=True)
     with open(filename, "w", encoding="utf-8") as f:
         f.write(script)
-    
+   
     logging.info(f"Saved: {filename}")
     return filename
 
@@ -77,9 +86,6 @@ def generate_all_scripts(language="English"):
             gender = random.choice(["Male", "Female"])
             generate_script(language, domain, company, role1, role2, emotion1, emotion2, gender, script_number)
             script_number += 1
-
-# Integrating with Streamlit chatbot
-import streamlit as st
 
 def main():
     st.title("Script Generator")
