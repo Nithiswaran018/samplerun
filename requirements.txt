@@ -1,6 +1,5 @@
-google.generativeai
+google-generativeai
 logging
-random
 itertools
 streamlit
 streamlit_lottie
