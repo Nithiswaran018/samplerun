@@ -1,7 +1,6 @@
 import google.generativeai as genai
 import os
 import logging
-import random
 import itertools
 
 # Initialize Gemini API
